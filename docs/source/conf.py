@@ -73,7 +73,7 @@ exclude_patterns = []
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = None
 
-autodoc_mock_imports = ['fog05_sdk']
+autodoc_mock_imports = ['fog05_sdk','yaks']
 
 # -- Options for HTML output -------------------------------------------------
 
