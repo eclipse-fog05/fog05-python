@@ -2,6 +2,7 @@
 [![License](https://img.shields.io/badge/License-EPL%202.0-blue)](https://choosealicense.com/licenses/epl-2.0/)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Documentation Status](https://readthedocs.org/projects/eclipse-fog05-python3-client-api/badge/?version=latest)](https://eclipse-fog05-python3-client-api.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.com/eclipse-fog05/api-python.svg?branch=master)](https://travis-ci.com/eclipse-fog05/api-python)
 
 # Eclispe fog05 Client API Python
 
