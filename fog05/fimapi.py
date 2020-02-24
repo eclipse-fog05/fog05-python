@@ -1121,7 +1121,7 @@ class FIMAPI(object):
             src_record = InfraFDU(record)
             dst_record = InfraFDU(record)
 
-            fduid = record.get_fdu_id()
+            fduid = src_record.get_fdu_id()
 
             src_record.set_status('TAKE_OFF')
             dst_record.set_status('LAND')
