@@ -781,6 +781,41 @@ class FIMAPI(object):
                     state, instanceid,fdu_info.get('error_code'), fdu_info.get('error_msg')))
             return fdu_info
 
+        def __wait_specific_node_fdu_state_change(self, nodeid, instanceid, state):
+            '''
+            Waits an FDU instance state to change
+
+            parameters
+            ----------
+            instanceid : string
+                UUID of instance
+            state : string
+                new state
+
+            returns
+            --------
+            dictionary
+
+            '''
+
+            fdu_info = self.connector.glob.actual.get_node_fdu_instance(
+                self.sysid, self.tenantid, nodeid, instanceid)
+            while fdu_info is None:
+                    fdu_info = self.connector.glob.actual.get_node_fdu_instance(
+                self.sysid, self.tenantid, nodeid, instanceid)
+            fdu = InfraFDU(fdu_info)
+            es = fdu.get_status()
+            while es.upper() not in [state, 'ERROR']:
+                fdu_info = self.connector.glob.actual.get_node_fdu_instance(
+                self.sysid, self.tenantid, nodeid, instanceid)
+                fdu = InfraFDU(fdu_info)
+                es = fdu.get_status()
+
+            if es.upper() == 'ERROR':
+                raise ValueError('Unable to change state to {} for FDU Instance: {} Errno: {} Msg: {}'.format(
+                    state, instanceid,fdu_info.get('error_code'), fdu_info.get('error_msg')))
+            return fdu_info
+
         def onboard(self, descriptor):
             '''
             Registers an FDU descriptor in the system catalog
@@ -1137,7 +1172,7 @@ class FIMAPI(object):
                                                 node, fduid, instanceid, src_record.to_json())
 
             if wait:
-                self.__wait_node_fdu_state_change(instanceid, 'RUN')
+                self.__wait_specific_node_fdu_state_change(destination_node_uuid, instanceid, 'RUN')
             return instanceid
 
 
