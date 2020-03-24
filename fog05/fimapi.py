@@ -416,7 +416,7 @@ class FIMAPI(object):
                 return net
             res = self.connector.glob.actual.create_network_in_node(self.sysid, self.tenantid, nodeid, descriptor)
             if res.get('error') is not None:
-                raise ValueError('Got Error {}'.format(res['error']))
+                raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
             return res['result']
 
         def remove_network_from_node(self, netid, nodeid):
@@ -436,7 +436,7 @@ class FIMAPI(object):
             '''
             res = self.connector.glob.actual.remove_network_from_node(self.sysid, self.tenantid, nodeid, netid)
             if res.get('error') is not None:
-                raise ValueError('Got Error {}'.format(res['error']))
+                raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
             return res['result']
 
 
@@ -508,7 +508,7 @@ class FIMAPI(object):
             res = self.connector.glob.actual.add_node_port_to_network(self.sysid, self.tenantid, node, port_info['uuid'], net_uuid)
             if res.get('result') is not None:
                 return cp_uuid
-            raise ValueError('Error connecting: {}'.format(res['error']))
+            raise ValueError('Error connecting: {} with message {}'.format(res['error'], res['error_msg']))
 
         def disconnect_cp(self, cp_uuid):
             '''
@@ -536,7 +536,7 @@ class FIMAPI(object):
             res = self.connector.glob.actual.remove_node_port_from_network(self.sysid, self.tenantid, node, port_info['uuid'])
             if res.get('result') is not None:
                 return cp_uuid
-            raise ValueError('Error connecting: {}'.format(res['error']))
+            raise ValueError('Error connecting: {} with message {}'.format(res['error'], res['error_msg']))
 
         def add_router(self, nodeid, descriptor):
             '''
@@ -781,6 +781,41 @@ class FIMAPI(object):
                     state, instanceid,fdu_info.get('error_code'), fdu_info.get('error_msg')))
             return fdu_info
 
+        def __wait_specific_node_fdu_state_change(self, nodeid, instanceid, state):
+            '''
+            Waits an FDU instance state to change
+
+            parameters
+            ----------
+            instanceid : string
+                UUID of instance
+            state : string
+                new state
+
+            returns
+            --------
+            dictionary
+
+            '''
+
+            fdu_info = self.connector.glob.actual.get_node_fdu_instance(
+                self.sysid, self.tenantid, nodeid, instanceid)
+            while fdu_info is None:
+                    fdu_info = self.connector.glob.actual.get_node_fdu_instance(
+                self.sysid, self.tenantid, nodeid, instanceid)
+            fdu = InfraFDU(fdu_info)
+            es = fdu.get_status()
+            while es.upper() not in [state, 'ERROR']:
+                fdu_info = self.connector.glob.actual.get_node_fdu_instance(
+                self.sysid, self.tenantid, nodeid, instanceid)
+                fdu = InfraFDU(fdu_info)
+                es = fdu.get_status()
+
+            if es.upper() == 'ERROR':
+                raise ValueError('Unable to change state to {} for FDU Instance: {} Errno: {} Msg: {}'.format(
+                    state, instanceid,fdu_info.get('error_code'), fdu_info.get('error_msg')))
+            return fdu_info
+
         def onboard(self, descriptor):
             '''
             Registers an FDU descriptor in the system catalog
@@ -796,7 +831,7 @@ class FIMAPI(object):
             FDU
             '''
             if not isinstance(descriptor, FDU):
-                raise ValueError('descriptor should be of type FDU')
+                raise ValueError('descriptor should be of type FDU; actual type: {}'.format(type(descriptor)))
             nodes = self.connector.glob.actual.get_all_nodes(self.sysid, self.tenantid)
             if len(nodes) == 0:
                 raise SystemError('No nodes in the system!')
@@ -804,7 +839,7 @@ class FIMAPI(object):
 
             res = self.connector.glob.actual.onboard_fdu_from_node(self.sysid, self.tenantid, n, descriptor.get_uuid(), descriptor.to_json())
             if res.get('result') is None:
-                raise SystemError('Error during onboarding {}'.format(res['error']))
+                raise SystemError('Error during onboarding {} with message {}'.format(res['error'], res['error_msg']))
             return FDU(res['result'])
 
 
@@ -825,7 +860,7 @@ class FIMAPI(object):
             res = self.connector.glob.desired.remove_catalog_fdu_info(
                 self.sysid, self.tenantid, fdu_uuid)
             # if res.get('result') is None:
-            #     raise SystemError('Error during onboarding {}'.format(res['error']))
+            #     raise SystemError('Error during onboarding {} with message {}'.format(res['error'], res['error_msg']))
 
             return fdu_uuid
 
@@ -854,7 +889,7 @@ class FIMAPI(object):
 
             res = self.connector.glob.actual.define_fdu_in_node(self.sysid, self.tenantid, node_uuid, fduid)
             if res.get('error') is not None:
-                raise ValueError('Got Error {}'.format(res['error']))
+                raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
             if wait:
                 self.__wait_node_fdu_state_change(res['result']['uuid'],'DEFINE')
             return InfraFDU(res['result'])
@@ -1137,7 +1172,7 @@ class FIMAPI(object):
                                                 node, fduid, instanceid, src_record.to_json())
 
             if wait:
-                self.__wait_node_fdu_state_change(instanceid, 'RUN')
+                self.__wait_specific_node_fdu_state_change(destination_node_uuid, instanceid, 'RUN')
             return instanceid
 
 

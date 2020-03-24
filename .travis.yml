@@ -16,7 +16,7 @@ before_install:
   - git clone https://github.com/atolab/zenoh-c && cd zenoh-c && git checkout 0.3.0 && make && sudo make install && cd ..
   - git clone https://github.com/atolab/zenoh-python && cd zenoh-python && git checkout 0.3.0 && python3 setup.py install && cd ..
   - git clone https://github.com/atolab/yaks-python && cd yaks-python && git checkout 0.3.0 && make install && cd ..
-  - git clone https://github.com/eclipse-fog05/sdk-python && cd sdk-python && git checkout 0.1 && make && make install && cd ..
+  - git clone https://github.com/eclipse-fog05/sdk-python -b master --depth 1 && cd sdk-python && make && make install && cd ..
 
 script:
   - make install
