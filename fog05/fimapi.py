@@ -15,6 +15,7 @@
 import uuid
 import random
 import time
+import concurrent.futures
 from enum import Enum
 from fog05_sdk.yaks_connector import Yaks_Connector
 from fog05_sdk.interfaces import Constants
@@ -55,11 +56,12 @@ class FIMAPI(object):
         self.connector = Yaks_Connector(locator)
         self.sysid = sysid
         self.tenantid = tenantid
+        self.executor = concurrent.futures.ThreadPoolExecutor()
         self.descriptor = self.Descriptor()
         self.node = self.Node(self.connector, self.sysid, self.tenantid)
         self.plugin = self.Plugin(self.connector, self.sysid, self.tenantid)
         self.network = self.Network(self.connector, self.sysid, self.tenantid)
-        self.fdu  = self.FDUAPI(self.connector, self.sysid, self.tenantid)
+        self.fdu  = self.FDUAPI(self.connector, self.sysid, self.tenantid. self.executor)
         self.image = self.Image(self.connector, self.sysid, self.tenantid)
         self.flavor = self.Flavor(self.connector, self.sysid, self.tenantid)
 
@@ -738,13 +740,14 @@ class FIMAPI(object):
         '''
 
         def __init__(self, connector=None, sysid=Constants.default_system_id,
-                     tenantid=Constants.default_tenant_id):
+                     tenantid=Constants.default_tenant_id, executor=None):
 
-            if connector is None:
-                raise RuntimeError('Yaks connector cannot be none in API!')
+            if connector is None or executor is None:
+                raise RuntimeError('Yaks connector or executor cannot be none in API!')
             self.connector = connector
             self.sysid = sysid
             self.tenantid = tenantid
+            self.executor = executor
 
         def __wait_node_fdu_state_change(self, instanceid, state):
             '''
@@ -1024,6 +1027,25 @@ class FIMAPI(object):
             if wait:
                 self.__wait_node_fdu_state_change(instanceid,  'RUN')
             return instanceid
+
+        def run(self, instanceid):
+            '''
+            Runs and waits the given instance unit it ends
+            returns the exit code of the instance
+
+            paremeters
+            ----------
+            instanceid : string
+                UUID of instance
+
+            returns
+            -------
+            int
+            '''
+            res = self.connector.glob.actual.run_fdu_in_node(self.sysid, self.tenantid, instanceid)
+            if res.get('error') is not None:
+                raise ValueError(res.get('error'))
+            return int(res.get('result'))
 
         def stop(self, instanceid, wait=True):
             '''
