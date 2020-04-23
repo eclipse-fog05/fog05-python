@@ -61,7 +61,7 @@ class FIMAPI(object):
         self.node = self.Node(self.connector, self.sysid, self.tenantid)
         self.plugin = self.Plugin(self.connector, self.sysid, self.tenantid)
         self.network = self.Network(self.connector, self.sysid, self.tenantid)
-        self.fdu  = self.FDUAPI(self.connector, self.sysid, self.tenantid. self.executor)
+        self.fdu  = self.FDUAPI(self.connector, self.sysid, self.tenantid, self.executor)
         self.image = self.Image(self.connector, self.sysid, self.tenantid)
         self.flavor = self.Flavor(self.connector, self.sysid, self.tenantid)
 
