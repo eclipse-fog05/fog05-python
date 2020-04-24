@@ -15,12 +15,108 @@
 import uuid
 import random
 import time
+import json
+import concurrent.futures
 from enum import Enum
 from fog05_sdk.yaks_connector import Yaks_Connector
 from fog05_sdk.interfaces import Constants
 from fog05_sdk.interfaces.FDU import FDU
 from fog05_sdk.interfaces.InfraFDU import InfraFDU
 from mvar import MVar
+
+
+
+class RunningFDU(object):
+    def __init__(self, connector, executor, instanceid,  sysid=Constants.default_system_id,
+                                    tenantid=Constants.default_tenant_id):
+        '''
+        Class: RunningFDU
+
+        This class implements the behaviour for a running FDU
+
+        attributes
+        ----------
+        instanceid : string
+            The associated FDU Instance ID
+
+        '''
+        self.sysid =  sysid
+        self.tenantid = tenantid
+        self.connector = connector
+        self.executor = executor
+        self.instanceid = instanceid
+        self.started = False
+        self.exit_code = None
+        self.log = None
+        self.var = MVar()
+        self.err_var = None
+
+    def run_job(self):
+        '''
+        Job that waits the FDU run to end
+        '''
+        self.stated = True
+        res = self.connector.glob.actual.run_fdu_in_node(self.sysid, self.tenantid, self.instanceid)
+        if res.get('error') is not None:
+                self.err_var = res.get('error')
+                self.var.put(-255)
+        else:
+            self.err_var = None
+            self.var.put(int(res.get('result')))
+
+
+    def run(self):
+        '''
+        Submits the run_job
+        '''
+        if self.started is False:
+            self.exit_code = None
+            self.log =  None
+            self.executor.submit(self.run_job)
+        else:
+            raise ValueError('FDU is still running, wait it to finish before restaring')
+
+    def get_result(self):
+        '''
+        If the FDU is still running blocks until in ends, then returns its exit code and log
+
+        ---
+        returns
+        (int, string)
+        '''
+        if self.exit_code == None and self.log == None:
+            exit_code = self.var.get()
+            if self.err_var is not None:
+                raise ValueError(self.err_var)
+            self.err_var = None
+            log = self.connector.glob.actual.log_fdu_in_node(self.sysid, self.tenantid, self.instanceid)
+
+            if log.get('error') is not None:
+                self.exit_code = int(exit_code)
+                raise ValueError(log.get('error'))
+            self.started = False
+            self.exit_code = int(exit_code)
+            self.log = log.get('result')
+        return (self.exit_code, self.log)
+
+    def get_log(self):
+        '''
+        Returns the log of the FDU if it has ended
+        ---
+        returns
+        string
+        '''
+        return self.log
+
+    def get_code(self):
+        '''
+        Returns the exit code of the FDU if it has ended
+        ---
+        returns
+        int
+        '''
+        return self.exit_code
+
 
 
 class FIMAPI(object):
@@ -55,11 +151,12 @@ class FIMAPI(object):
         self.connector = Yaks_Connector(locator)
         self.sysid = sysid
         self.tenantid = tenantid
+        self.executor = concurrent.futures.ThreadPoolExecutor()
         self.descriptor = self.Descriptor()
         self.node = self.Node(self.connector, self.sysid, self.tenantid)
         self.plugin = self.Plugin(self.connector, self.sysid, self.tenantid)
         self.network = self.Network(self.connector, self.sysid, self.tenantid)
-        self.fdu  = self.FDUAPI(self.connector, self.sysid, self.tenantid)
+        self.fdu  = self.FDUAPI(self.connector, self.sysid, self.tenantid, self.executor)
         self.image = self.Image(self.connector, self.sysid, self.tenantid)
         self.flavor = self.Flavor(self.connector, self.sysid, self.tenantid)
 
@@ -738,13 +835,14 @@ class FIMAPI(object):
         '''
 
         def __init__(self, connector=None, sysid=Constants.default_system_id,
-                     tenantid=Constants.default_tenant_id):
+                     tenantid=Constants.default_tenant_id, executor=None):
 
-            if connector is None:
-                raise RuntimeError('Yaks connector cannot be none in API!')
+            if connector is None or executor is None:
+                raise RuntimeError('Yaks connector or executor cannot be none in API!')
             self.connector = connector
             self.sysid = sysid
             self.tenantid = tenantid
+            self.executor = executor
 
         def __wait_node_fdu_state_change(self, instanceid, state):
             '''
@@ -1025,6 +1123,26 @@ class FIMAPI(object):
                 self.__wait_node_fdu_state_change(instanceid,  'RUN')
             return instanceid
 
+        def run(self, instanceid):
+            '''
+            Runs and waits the given instance unit it ends
+            returns a RunningFDU object where wait the FDU to end its execution.
+
+            The RunningFDU object can be used to re-run the given FDU
+
+            paremeters
+            ----------
+            instanceid : string
+                UUID of instance
+
+            returns
+            -------
+            RunningFDU
+            '''
+            res = RunningFDU(self.connector, self.executor, instanceid)
+            res.run()
+            return res
+
         def stop(self, instanceid, wait=True):
             '''
             Stops the given instance
@@ -1226,6 +1344,59 @@ class FIMAPI(object):
             self.clean(instanceid)
             return self.undefine(instanceid)
 
+        def log(self, instanceid):
+            '''
+            Gets the log for the given FDU instance
+            paremeters
+            ----------
+            instanceid : string
+                UUID of instance
+
+            returns
+            -------
+            string
+            '''
+            log = self.connector.glob.actual.log_fdu_in_node(self.sysid, self.tenantid, instanceid)
+
+            if log.get('error') is not None:
+                raise ValueError(log.get('error'))
+            return log.get('result')
+
+        def ls(self, instanceid):
+            '''
+            Lists the file in the given FDU instance directory
+            paremeters
+            ----------
+            instanceid : string
+                UUID of instance
+
+            returns
+            -------
+            string list
+            '''
+            ls = self.connector.glob.actual.ls_fdu_in_node(self.sysid, self.tenantid, instanceid)
+
+            if ls.get('error') is not None:
+                raise ValueError(ls.get('error'))
+            return json.loads(ls.get('result'))
+
+        def get_file(self, instanceid, filename):
+            '''
+            Gets the given filename for the given FDU instance
+            paremeters
+            ----------
+            instanceid : string
+                UUID of instance
+
+            returns
+            -------
+            string
+            '''
+            data = self.connector.glob.actual.file_fdu_in_node(self.sysid, self.tenantid, instanceid, filename)
+
+            if data.get('error') is not None:
+                raise ValueError(data.get('error'))
+            return data.get('result')
 
         def search(self, search_dict, node_uuid=None):
             '''
