@@ -45,6 +45,7 @@ class RunningFDU(object):
         self.connector = connector
         self.executor = executor
         self.instanceid = instanceid
+        self.started = False
         self.exit_code = None
         self.log = None
         self.var = MVar()
@@ -54,6 +55,7 @@ class RunningFDU(object):
         '''
         Job that waits the FDU run to end
         '''
+        self.stated = True
         res = self.connector.glob.actual.run_fdu_in_node(self.sysid, self.tenantid, self.instanceid)
         if res.get('error') is not None:
                 self.err_var = res.get('error')
@@ -67,7 +69,7 @@ class RunningFDU(object):
         '''
         Submits the run_job
         '''
-        if self.exit_code is not None:
+        if self.started is False:
             self.exit_code = None
             self.log =  None
             self.executor.submit(self.run_job)
@@ -92,7 +94,7 @@ class RunningFDU(object):
             if log.get('error') is not None:
                 self.exit_code = int(exit_code)
                 raise ValueError(log.get('error'))
-
+            self.started = False
             self.exit_code = int(exit_code)
             self.log = log.get('result')
         return (self.exit_code, self.log)
