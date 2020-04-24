@@ -1356,7 +1356,7 @@ class FIMAPI(object):
             -------
             string
             '''
-            log = self.connector.glob.actual.log_fdu_in_node(self.sysid, self.tenantid, self.instanceid)
+            log = self.connector.glob.actual.log_fdu_in_node(self.sysid, self.tenantid, instanceid)
 
             if log.get('error') is not None:
                 raise ValueError(log.get('error'))
@@ -1374,7 +1374,7 @@ class FIMAPI(object):
             -------
             string list
             '''
-            ls = self.connector.glob.actual.ls_fdu_in_node(self.sysid, self.tenantid, self.instanceid)
+            ls = self.connector.glob.actual.ls_fdu_in_node(self.sysid, self.tenantid, instanceid)
 
             if ls.get('error') is not None:
                 raise ValueError(ls.get('error'))
@@ -1392,7 +1392,7 @@ class FIMAPI(object):
             -------
             string
             '''
-            data = self.connector.glob.actual.file_fdu_in_node(self.sysid, self.tenantid, self.instanceid, filename)
+            data = self.connector.glob.actual.file_fdu_in_node(self.sysid, self.tenantid, instanceid, filename)
 
             if data.get('error') is not None:
                 raise ValueError(data.get('error'))
