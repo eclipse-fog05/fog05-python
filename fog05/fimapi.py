@@ -27,7 +27,7 @@ from mvar import MVar
 
 
 class RunningFDU(object):
-    def __init__(self, connector, executor, instanceid,  sysid=Constants.default_system_id,
+    def __init__(self, connector, executor, instanceid, env,  sysid=Constants.default_system_id,
                                     tenantid=Constants.default_tenant_id):
         '''
         Class: RunningFDU
@@ -45,6 +45,7 @@ class RunningFDU(object):
         self.connector = connector
         self.executor = executor
         self.instanceid = instanceid
+        self.env = env
         self.started = False
         self.exit_code = None
         self.log = None
@@ -56,7 +57,7 @@ class RunningFDU(object):
         Job that waits the FDU run to end
         '''
         self.stated = True
-        res = self.connector.glob.actual.run_fdu_in_node(self.sysid, self.tenantid, self.instanceid)
+        res = self.connector.glob.actual.run_fdu_in_node(self.sysid, self.tenantid, self.instanceid, self.env)
         if res.get('error') is not None:
                 self.err_var = res.get('error')
                 self.var.put(-255)
@@ -997,7 +998,7 @@ class FIMAPI(object):
             '''
             Undefines the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1026,7 +1027,7 @@ class FIMAPI(object):
             '''
             Configures the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1059,7 +1060,7 @@ class FIMAPI(object):
             '''
             Cleans the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1089,14 +1090,16 @@ class FIMAPI(object):
                 self.__wait_node_fdu_state_change(instanceid,  'DEFINE')
             return instanceid
 
-        def start(self, instanceid, wait=True):
+        def start(self, instanceid, env="", wait=True):
             '''
             Starts the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
+            env : string
+                Environment variables to be configured at the starting of the FDU in the format MYVAR=MYVALUE,MYVAR2=MYVALUE2,...
             wait : bool
                 optional, call will block until FDU is started
 
@@ -1105,41 +1108,51 @@ class FIMAPI(object):
             string
             '''
 
-            node = self.connector.glob.actual.get_fdu_instance_node(
-                self.sysid, self.tenantid, instanceid)
-            if node is None:
-                raise ValueError('Unable to find node for this instanceid')
-
-            record = self.connector.glob.actual.get_node_fdu_instance(
-                self.sysid, self.tenantid, node, instanceid)
-
-            record = InfraFDU(record)
-
-            record.set_status('RUN')
-            fduid = record.get_fdu_id()
-
-            res = self.connector.glob.desired.add_node_fdu(self.sysid, self.tenantid, node, fduid, instanceid, record.to_json())
             if wait:
-                self.__wait_node_fdu_state_change(instanceid,  'RUN')
+                res = self.connector.glob.actual.start_fdu_in_node(self.sysid, self.tenantid, instanceid, env)
+                if res.get('error') is not None:
+                    raise ValueError(res.get('error'))
+                return res.get('result')
+
+            self.executor.submit(self.connector.glob.actual.start_fdu_in_node,self.sysid, self.tenantid, instanceid, env)
             return instanceid
 
-        def run(self, instanceid):
+            # node = self.connector.glob.actual.get_fdu_instance_node(
+            #     self.sysid, self.tenantid, instanceid)
+            # if node is None:
+            #     raise ValueError('Unable to find node for this instanceid')
+
+            # record = self.connector.glob.actual.get_node_fdu_instance(
+            #     self.sysid, self.tenantid, node, instanceid)
+
+            # record = InfraFDU(record)
+
+            # record.set_status('RUN')
+            # fduid = record.get_fdu_id()
+
+            # res = self.connector.glob.desired.add_node_fdu(self.sysid, self.tenantid, node, fduid, instanceid, record.to_json())
+            # if wait:
+            #     self.__wait_node_fdu_state_change(instanceid,  'RUN')
+            # return instanceid
+
+        def run(self, instanceid, env=""):
             '''
             Runs and waits the given instance unit it ends
             returns a RunningFDU object where wait the FDU to end its execution.
 
             The RunningFDU object can be used to re-run the given FDU
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
-
+            env : string
+                Environment variables to be configured at the starting of the FDU in the format MYVAR=MYVALUE,MYVAR2=MYVALUE2,...
             returns
             -------
             RunningFDU
             '''
-            res = RunningFDU(self.connector, self.executor, instanceid)
+            res = RunningFDU(self.connector, self.executor, instanceid, env)
             res.run()
             return res
 
@@ -1147,7 +1160,7 @@ class FIMAPI(object):
             '''
             Stops the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1181,7 +1194,7 @@ class FIMAPI(object):
             '''
             Pauses the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1215,7 +1228,7 @@ class FIMAPI(object):
             '''
             Resumes the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1250,7 +1263,7 @@ class FIMAPI(object):
             '''
             Migrates the given instance
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1329,7 +1342,7 @@ class FIMAPI(object):
 
             This function calls: stop, clean, undefine
 
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1347,7 +1360,7 @@ class FIMAPI(object):
         def log(self, instanceid):
             '''
             Gets the log for the given FDU instance
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1365,7 +1378,7 @@ class FIMAPI(object):
         def ls(self, instanceid):
             '''
             Lists the file in the given FDU instance directory
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
@@ -1383,7 +1396,7 @@ class FIMAPI(object):
         def get_file(self, instanceid, filename):
             '''
             Gets the given filename for the given FDU instance
-            paremeters
+            parameters
             ----------
             instanceid : string
                 UUID of instance
