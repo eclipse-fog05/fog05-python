@@ -1110,11 +1110,12 @@ class FIMAPI(object):
 
             if wait:
                 res = self.connector.glob.actual.start_fdu_in_node(self.sysid, self.tenantid, instanceid, env)
-                res = json.loads(res)
-                return res.get('uuid')
+                if res.get('error') is not None:
+                    raise ValueError(res.get('error'))
+                return res.get('result')
 
             self.executor.submit(self.connector.glob.actual.start_fdu_in_node,self.sysid, self.tenantid, instanceid, env)
-            return intstanceid
+            return instanceid
 
             # node = self.connector.glob.actual.get_fdu_instance_node(
             #     self.sysid, self.tenantid, instanceid)
