@@ -963,7 +963,7 @@ class FIMAPI(object):
 
             return fdu_uuid
 
-        def define(self, fduid, node_uuid, wait=True):
+        def define(self, fduid, node_uuid=None, wait=True):
             '''
             Defines the given fdu in the given node
 
@@ -974,24 +974,39 @@ class FIMAPI(object):
             fduid : string
                 UUID of the FDU
             node_uuid : string
-                UUID of the node
+                UUID of the node optional
             wait : bool
                 optional, call will block until FDU is defined
             returns
             -------
             InfraFDU
             '''
-            desc = self.connector.glob.actual.get_catalog_fdu_info(
-                self.sysid, self.tenantid, fduid)
-            if desc is None:
-                raise ValueError('FDU with this UUID not found in the catalog')
 
-            res = self.connector.glob.actual.define_fdu_in_node(self.sysid, self.tenantid, node_uuid, fduid)
-            if res.get('error') is not None:
-                raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
-            if wait:
-                self.__wait_node_fdu_state_change(res['result']['uuid'],'DEFINE')
-            return InfraFDU(res['result'])
+
+            if node_uuid is not None:
+
+                desc = self.connector.glob.actual.get_catalog_fdu_info(
+                    self.sysid, self.tenantid, fduid)
+                if desc is None:
+                    raise ValueError('FDU with this UUID not found in the catalog')
+
+                res = self.connector.glob.actual.define_fdu_in_node(self.sysid, self.tenantid, node_uuid, fduid)
+                if res.get('error') is not None:
+                    raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
+                if wait:
+                    self.__wait_node_fdu_state_change(res['result']['uuid'],'DEFINE')
+                return InfraFDU(res['result'])
+            else:
+                nodes = self.connector.glob.actual.get_all_nodes(self.sysid, self.tenantid)
+                if len(nodes) == 0:
+                    raise SystemError('No nodes in the system!')
+                n = random.choice(nodes)
+                res = self.connector.glob.actual.schedule_fdu_from_node(self.sysid, self.tenantid, n, fduid)
+                if res.get('error') is not None:
+                    raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
+                if wait:
+                    self.__wait_node_fdu_state_change(res['result']['uuid'],'DEFINE')
+                return InfraFDU(res['result'])
 
 
         def undefine(self, instanceid):
