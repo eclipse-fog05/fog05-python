@@ -1,7 +1,7 @@
 ## master
 
- - de3f903 gabrik  Mon Apr 27 14:37:21 2020 +0200  fix returns in FIMAPI.start
- - 37631cf gabrik  Mon Apr 27 11:55:48 2020 +0200  updated FIMAPI.start to use the eval and take environment variables as optional parameter
+ - 81e9b0a Gabriele Baldoni        Tue May 12 12:35:25 2020 +0200  node_uuid is optional in FDU.define, scheduler is used to select the node (#17)
+ - 1aba85a Gabriele Baldoni        Mon Apr 27 15:39:20 2020 +0200  Possibility to pass environment variable at FDU start/run (#16)
  - 2d46140 Gabriele Baldoni        Fri Apr 24 12:02:53 2020 +0200  Blocking run of FDU, getting Log, file listing and file content  (#15)
  - 95cec06	Gabriele Baldoni	Fri Mar 27 15:33:45 2020 +0100	updated version number and requirement on fog05-sdk (#14)
  - a3c9c01	Gabriele Baldoni	Tue Mar 24 15:02:28 2020 +0100	Improve errors descriptions (#13)
