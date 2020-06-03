@@ -1750,3 +1750,23 @@ class FIMAPI(object):
             string list
             '''
             raise NotImplementedError("Not yet...")
+
+
+class FIMAuthExcetpion(Exception):
+    def __init__(self, message):
+        super(FIMAuthExcetpion, self).__init__(message)
+
+
+class FIMAResouceExistingException(Exception):
+    def __init__(self, message):
+        super(FIMAResouceExistingException, self).__init__(message)
+
+
+class FIMNotFoundException(Exception):
+    def __init__(self, message):
+        super(FIMNotFoundException, self).__init__(message)
+
+
+class FIMTaskFailedException(Exception):
+    def __init__(self, message):
+        super(FIMTaskFailedException, self).__init__(message)
