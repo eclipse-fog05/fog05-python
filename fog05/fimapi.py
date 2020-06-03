@@ -462,14 +462,18 @@ class FIMAPI(object):
 
             returns
             -------
-            bool
+            string
             '''
 
             descriptor.update({'status': 'add'})
             net_id = descriptor.get('uuid')
+            if net_id is None:
+                net_id = uuid.uuid4()
+                descriptor['uuid'] = net_id
 
             self.connector.glob.desired.add_network(
                 self.sysid, self.tenantid, net_id, descriptor)
+            return net_id
 
         def remove_network(self, net_uuid):
             '''
@@ -1582,6 +1586,9 @@ class FIMAPI(object):
             '''
 
             img_id = descriptor.get('uuid')
+            if img_id is None:
+                img_id = uuid.uuid4()
+                descriptor['uuid'] = img_id
             res = self.connector.glob.desired.add_image(self.sysid,
              self.tenantid,img_id, descriptor)
             return img_id
@@ -1678,8 +1685,11 @@ class FIMAPI(object):
             -------
             string
             '''
-
             flv_id = descriptor.get('uuid')
+            if flv_id is None:
+                flv_id = uuid.uuid4()
+                descriptor['uuid'] = flv_id
+
             res = self.connector.glob.desired.add_flavor(self.sysid,
              self.tenantid,flv_id, descriptor)
             return flv_id
