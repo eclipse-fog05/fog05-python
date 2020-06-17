@@ -513,7 +513,7 @@ class FIMAPI(object):
             dictionary
             '''
             nets = self.list()
-            ni = [x for x in nets if x['uuid'] == netid]
+            ni = [x for x in nets if x['uuid'] == net_id]
             if len(ni) > 0:
                     descriptor = ni[0]
             else:
@@ -522,7 +522,7 @@ class FIMAPI(object):
             net = self.connector.glob.actual.get_node_network(self.sysid, self.tenantid, nodeid, net_id)
             if net is not None:
                 return net
-            res = self.connector.glob.actual.create_network_in_node(self.sysid, self.tenantid, nodeid, descriptor)
+            res = self.connector.glob.actual.create_network_in_node(self.sysid, self.tenantid, nodeid, net_id)
             if res.get('error') is not None:
                 raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
             return res['result']
