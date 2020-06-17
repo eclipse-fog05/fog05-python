@@ -514,7 +514,7 @@ class FIMAPI(object):
             '''
             nets = self.list()
             ni = [x for x in nets if x['uuid'] == netid]
-             if len(ni) > 0:
+            if len(ni) > 0:
                     descriptor = ni[0]
             else:
                 raise ValueError('Network  {} not present in catalog'.format(net_id))
