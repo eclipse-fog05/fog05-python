@@ -497,14 +497,14 @@ class FIMAPI(object):
             self.connector.glob.desired.remove_network(
                 self.sysid, self.tenantid, net_uuid)
 
-        def add_network_to_node(self, net_id, nodeid):
+        def add_network_to_node(self, descriptor, nodeid):
             '''
             Creates the given virtual network in the given node
 
             parameters
             ----------
-            net_id : string
-                network uuid
+            descriptor : dictionary
+                network descriptor
             nodeid : string
                 UUID of node
 
@@ -512,10 +512,11 @@ class FIMAPI(object):
             -------
             dictionary
             '''
+            net_id = descriptor.get('uuid')
             nets = self.list()
             ni = [x for x in nets if x['uuid'] == net_id]
             if len(ni) > 0:
-                    descriptor = ni[0]
+                    d = ni[0]
             else:
                 raise ValueError('Network  {} not present in catalog'.format(net_id))
 
