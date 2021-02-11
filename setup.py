@@ -19,7 +19,7 @@ from setuptools import setup
 
 setup(
     name='fog05',
-    version='0.2.0',
+    version='0.2.1',
     python_requires='>=3',
     author='ADLINK',
     packages=['fog05'],
@@ -27,7 +27,7 @@ setup(
     url='https://fog05.io',
     author_email='gabriele.baldoni@adlinktech.com',
     license='Apache 2.O or EPL 2.0',
-    install_requires=['fog05-sdk==0.2.0','yaks==0.3.0.post1', 'jsonschema','mvar==0.0.1'],
+    install_requires=['fog05-sdk==0.2.1','yaks==0.3.0.post1', 'jsonschema','mvar==0.0.1'],
     scripts=[],
     include_package_data=True
 )

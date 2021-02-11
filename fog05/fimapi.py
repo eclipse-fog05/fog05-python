@@ -462,14 +462,18 @@ class FIMAPI(object):
 
             returns
             -------
-            bool
+            string
             '''
 
             descriptor.update({'status': 'add'})
             net_id = descriptor.get('uuid')
+            if net_id is None:
+                net_id = uuid.uuid4()
+                descriptor['uuid'] = net_id
 
             self.connector.glob.desired.add_network(
                 self.sysid, self.tenantid, net_id, descriptor)
+            return net_id
 
         def remove_network(self, net_uuid):
             '''
@@ -509,10 +513,17 @@ class FIMAPI(object):
             dictionary
             '''
             net_id = descriptor.get('uuid')
+            nets = self.list()
+            ni = [x for x in nets if x['uuid'] == net_id]
+            if len(ni) > 0:
+                    d = ni[0]
+            else:
+                raise ValueError('Network  {} not present in catalog'.format(net_id))
+
             net = self.connector.glob.actual.get_node_network(self.sysid, self.tenantid, nodeid, net_id)
             if net is not None:
                 return net
-            res = self.connector.glob.actual.create_network_in_node(self.sysid, self.tenantid, nodeid, descriptor)
+            res = self.connector.glob.actual.create_network_in_node(self.sysid, self.tenantid, nodeid, net_id)
             if res.get('error') is not None:
                 raise ValueError('Got  Error {} with message {}'.format(res['error'], res['error_msg']))
             return res['result']
@@ -1582,6 +1593,9 @@ class FIMAPI(object):
             '''
 
             img_id = descriptor.get('uuid')
+            if img_id is None:
+                img_id = uuid.uuid4()
+                descriptor['uuid'] = img_id
             res = self.connector.glob.desired.add_image(self.sysid,
              self.tenantid,img_id, descriptor)
             return img_id
@@ -1678,8 +1692,11 @@ class FIMAPI(object):
             -------
             string
             '''
-
             flv_id = descriptor.get('uuid')
+            if flv_id is None:
+                flv_id = uuid.uuid4()
+                descriptor['uuid'] = flv_id
+
             res = self.connector.glob.desired.add_flavor(self.sysid,
              self.tenantid,flv_id, descriptor)
             return flv_id
@@ -1750,3 +1767,23 @@ class FIMAPI(object):
             string list
             '''
             raise NotImplementedError("Not yet...")
+
+
+class FIMAuthExcetpion(Exception):
+    def __init__(self, message):
+        super(FIMAuthExcetpion, self).__init__(message)
+
+
+class FIMAResouceExistingException(Exception):
+    def __init__(self, message):
+        super(FIMAResouceExistingException, self).__init__(message)
+
+
+class FIMNotFoundException(Exception):
+    def __init__(self, message):
+        super(FIMNotFoundException, self).__init__(message)
+
+
+class FIMTaskFailedException(Exception):
+    def __init__(self, message):
+        super(FIMTaskFailedException, self).__init__(message)
