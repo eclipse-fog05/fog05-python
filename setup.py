@@ -27,7 +27,7 @@ setup(
     url='https://fog05.io',
     author_email='gabriele.baldoni@adlinktech.com',
     license='Apache 2.O or EPL 2.0',
-    install_requires=['cbor2'],
+    install_requires=['cbor2','pyyaml'],
     scripts=[],
     include_package_data=True
 )

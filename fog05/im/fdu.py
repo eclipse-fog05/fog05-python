@@ -2,6 +2,7 @@ from enum import Enum
 import cbor2
 import uuid
 import json
+import yaml
 
 class MigrationKind(Enum):
     LIVE = "LIVE"
@@ -312,6 +313,16 @@ class FDUDescriptor(object):
     def serialize_json(self):
         return json.dumps(self.as_dict())
 
+    
+    def serialize_yaml(self):
+        return yaml.dump_all(self.as_dict())
+
+    @staticmethod
+    def deserialize_yaml(serialized):
+        data = yaml.full_load(serialized)
+        return FDUDescriptor(**data)
+
+
     @staticmethod
     def deserialize_json(serialized):
         data = json.loads(serialized)
@@ -455,6 +466,14 @@ class FDURecord(object):
 
     def serialize_json(self):
         return json.dumps(self.as_dict())
+
+    def serialize_yaml(self):
+        return yaml.dump_all(self.as_dict())
+
+    @staticmethod
+    def deserialize_yaml(serialized):
+        data = yaml.full_load(serialized)
+        return FDURecord(**data)
 
     @staticmethod
     def deserialize_json(serialized):
