@@ -1,4 +1,4 @@
-# Copyright (c) 2014,2018 Contributors to the Eclipse Foundation
+# Copyright (c) 2014,2021 Contributors to the Eclipse Foundation
 #
 # See the NOTICE file(s) distributed with this work for additional
 # information regarding copyright ownership.
@@ -19,15 +19,15 @@ from setuptools import setup
 
 setup(
     name='fog05',
-    version='0.2.1',
+    version='0.3.0.alpha1',
     python_requires='>=3',
     author='ADLINK',
-    packages=['fog05'],
-    description='Eclipse fog05 Client API',
+    packages=['fog05','fog05.im'],
+    description='Eclipse fog05 Python API',
     url='https://fog05.io',
     author_email='gabriele.baldoni@adlinktech.com',
     license='Apache 2.O or EPL 2.0',
-    install_requires=['fog05-sdk==0.2.1','yaks==0.3.0.post1', 'jsonschema','mvar==0.0.1'],
+    install_requires=['cbor2'],
     scripts=[],
     include_package_data=True
 )

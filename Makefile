@@ -1,4 +1,5 @@
-all: echo "Nothing to do..."
+all: 
+	python3 -m build
 
 
 clean:
@@ -6,8 +7,7 @@ clean:
 	make -C docs clean
 
 install:
-	python3 setup.py install
-	rm -rf build dist fog05.egg-info
+	pip3 install ./dist/fog05-0.3.0a1-py3-none-any.whl 
 
 uninstall:
 	pip3 uninstall fog05 -y
