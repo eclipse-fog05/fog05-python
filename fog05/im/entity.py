@@ -14,7 +14,6 @@
 # Python API and SDK
 
 
-
 from enum import Enum
 from fog05.im.fdu import FDUDescriptor
 import cbor2
@@ -125,13 +124,13 @@ class EntityDescriptor(object):
         d = self.__dict__
         for k, v in d.items():
             if isinstance(v, list) and len(v) > 0:
-                l = []
-                if isinstance(v[0], VirtualNetwork) or isinstance(v[0], FDUDescriptor)):
+                value_list = []
+                if isinstance(v[0], VirtualNetwork) or isinstance(v[0], FDUDescriptor):
                     for i in v:
-                        l.append(i.as_dict())
+                        value_list.append(i.as_dict())
                 else:
-                    l = v
-                d.update({k: l})
+                    value_list = v
+                d.update({k: value_list})
         return d
 
     def serialize_cbor(self):
@@ -140,7 +139,6 @@ class EntityDescriptor(object):
     def serialize_json(self):
         return json.dumps(self.as_dict())
 
-    
     def serialize_yaml(self):
         return yaml.dump_all(self.as_dict())
 
@@ -148,7 +146,6 @@ class EntityDescriptor(object):
     def deserialize_yaml(serialized):
         data = yaml.full_load(serialized)
         return EntityDescriptor(**data)
-
 
     @staticmethod
     def deserialize_json(serialized):
@@ -189,14 +186,14 @@ class EntityRecord(object):
                     if isinstance(value, dict):
                         pass
                     elif isinstance(value, list):
-                        l = []
+                        value_list = []
                         if key == "fdus":
                             for i in value:
-                                l.append(uuid.UUID(bytes=i))
+                                value_list.append(uuid.UUID(bytes=i))
                         elif key == "virtual_links":
                             for i in value:
-                                l.append(uuid.UUID(bytes=i))
-                        self.__dict__.update({key: l})
+                                value_list.append(uuid.UUID(bytes=i))
+                        self.__dict__.update({key: value_list})
                     else:
                         if key == "uuid":
                             self.__dict__.update({key: uuid.UUID(bytes=value)})
@@ -205,19 +202,8 @@ class EntityRecord(object):
                         else:
                             self.__dict__.update({key: value})
 
-
     def as_dict(self):
-        d = self.__dict__
-        for k, v in d.items():
-            if isinstance(v, list) and len(v) > 0:
-                l = []
-                if isinstance(v[0], RecordConnectionPoint) or isinstance(v[0], RecordConnectionPoint):
-                    for i in v:
-                        l.append(i.as_dict())
-                else:
-                    l = v
-                d.update({k: l})
-        return d
+        return self.__dict__
 
     def serialize_cbor(self):
         return cbor2.dumps(self.as_dict())
@@ -242,4 +228,3 @@ class EntityRecord(object):
     def deserialize_cbor(serialized):
         data = cbor2.loads(serialized)
         return EntityRecord(**data)
-
