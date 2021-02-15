@@ -1,0 +1,51 @@
+[package]
+name = "fog05-python"
+version = "0.3.0-a1"
+authors = ["gabrik <gabriele.baldoni@gmail.com>"]
+edition = "2018"
+
+[package.metadata.maturin]
+classifier = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Rust",
+    "Intended Audience :: Developers",
+    "Development Status :: 4 - Beta",
+    "License :: OSI Approved :: Apache Software License",
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+    "Operating System :: POSIX :: Linux",
+]
+maintainer = "ADLINK zenoh team, <zenoh@adlink-labs.tech>"
+
+[lib]
+name = "fog05"
+crate-type = ["cdylib"]
+
+[dependencies]
+fog05-sdk = { path = "../fog05/fog05-sdk" }
+zrpc = { path = "../fog05/zrpc" }
+async-std = "=1.9.0"
+uhlc = "0.2"
+futures = "0.3.12"
+log = "0.4"
+env_logger = "0.8.2"
+bincode = { version = "1.3.1", optional = true}
+serde_cbor = {version = "0.11.1", optional = true}
+serde_json = { version = "1.0.55", optional = true}
+serde_yaml = {version = "0.8.13", optional = true}
+
+[dependencies.pyo3]
+version = "0.13.1"
+features = ["extension-module", "abi3-py36"]
+
+
+
+
+[features]
+bincode_ser = ["bincode"]
+json = ["serde_json"]
+cbor = ["serde_cbor"]
+yaml = ["serde_yaml"]
+
+
+default = ["cbor", "json", "yaml"]
+

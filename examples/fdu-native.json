@@ -1,0 +1,22 @@
+{
+    "id": "test-ping-fdu",
+    "name": "ping fdu",
+    "version": "0.3.0",
+    "fdu_version": "0.0.1",
+    "hypervisor": "bare",
+    "computation_requirements": {
+      "cpu_arch": "x86_64",
+      "cpu_min_freq": 0,
+      "cpu_min_count": 0,
+      "gpu_min_count": 0,
+      "fpga_min_count": 0,
+      "ram_size_mb": 10,
+      "storage_size_mb": 1
+    },
+    "migration_kind": "COLD",
+    "hypervisor_specific": "{\"cmd\":\"ping\",\"args\":[\"1.1.1.1\"],\"env\":{}}",
+    "interfaces": [],
+    "storage": [],
+    "connection_points": [],
+    "depends_on": []
+  }
