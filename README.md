@@ -13,11 +13,11 @@ With this API you can interact with Eclipse fog05 nodes and deploy your applicat
 -------------------------------
 ## How to install it
 
-The Eclipse fog05-python library is available on [Pypi.org](https://pypi.org/project/eclipse-zenoh/).
+<!-- The Eclipse fog05-python library is available on [Pypi.org](https://pypi.org/project/eclipse-fog05/).
 Install the latest available version using `pip`:
 ```
-pip install eclipse-zenoh
-```
+pip install eclipse-fog05
+``` -->
 
 :warning:WARNING:warning: fog05-python is developped in Rust.
 On Pypi.org we provide binary wheels for the most common platforms (MacOS, Linux x86). But also a source distribution package for other platforms.
@@ -30,7 +30,7 @@ However, for `pip` to be able to build this source distribution, there some prer
 
 fog05-python has been tested with Python 3.6, 3.7, 3.8 and 3.9.
 
-It relies on the [zenoh](https://github.com/eclipse-zenoh/zenoh/tree/master/zenoh) Rust API which require the full `std` library. See the list Rust supported platforms here: https://doc.rust-lang.org/nightly/rustc/platform-support.html .
+It relies on the [fog05](https://github.com/eclipse-fog05/fog05/tree/master/fog05-sdk) Rust API which require the full `std` library. See the list Rust supported platforms here: https://doc.rust-lang.org/nightly/rustc/platform-support.html .
 
 Currently only the following platforms have been tested:
  * Linux
@@ -64,7 +64,7 @@ Steps:
    maturin develop --release
    ```
 
-Maturin will automatically build the zenoh Rust API, as well as the fog05-python API and install it in your Python virtual environement.
+Maturin will automatically build the fog05 Rust API, as well as the fog05-python API and install it in your Python virtual environement.
 
 
 ## Docs
