@@ -54,7 +54,9 @@ impl EntityDescriptor {
 
     #[cfg(feature = "json")]
     fn serialize_json(&self) -> PyResult<Vec<u8>> {
-        Ok(serde_json::to_string(&self.d).map_err(json_to_pyerr)?.into_bytes())
+        Ok(serde_json::to_string(&self.d)
+            .map_err(json_to_pyerr)?
+            .into_bytes())
     }
 
     #[cfg(feature = "json")]

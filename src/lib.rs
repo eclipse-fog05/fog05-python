@@ -15,8 +15,11 @@ use pyo3::create_exception;
 use pyo3::prelude::*;
 use pyo3::{exceptions, wrap_pymodule};
 
-mod im;
-use im::*;
+pub mod im;
+pub use im::*;
+
+pub mod api;
+pub use api::*;
 
 #[pymodule]
 fn fog05(py: Python, m: &PyModule) -> PyResult<()> {
@@ -28,6 +31,19 @@ fn fog05(py: Python, m: &PyModule) -> PyResult<()> {
         "\
 import sys
 sys.modules['fog05.im'] = im
+        ",
+        None,
+        Some(m.dict()),
+    )?;
+
+    m.add_wrapped(wrap_pymodule!(api))?;
+
+    // force addition of "zenoh.net" module
+    // (see https://github.com/PyO3/pyo3/issues/759#issuecomment-653964601)
+    py.run(
+        "\
+import sys
+sys.modules['fog05.api'] = api
         ",
         None,
         Some(m.dict()),

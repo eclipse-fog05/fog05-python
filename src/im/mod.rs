@@ -14,11 +14,11 @@
 use pyo3::prelude::*;
 use pyo3::wrap_pymodule;
 
-mod fdu;
-use fdu::*;
+pub mod fdu;
+pub use fdu::*;
 
-mod entity;
-use entity::*;
+pub mod entity;
+pub use entity::*;
 
 #[pymodule]
 fn im(py: Python, m: &PyModule) -> PyResult<()> {
