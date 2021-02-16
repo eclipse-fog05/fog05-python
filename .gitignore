@@ -25,3 +25,5 @@ docs/_*
 *.log
 *.BAK
 *.bak
+
+venv/

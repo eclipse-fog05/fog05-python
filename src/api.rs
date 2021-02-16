@@ -14,13 +14,12 @@
 use async_std::sync::Arc;
 use async_std::task;
 use fog05_sdk::api;
-use fog05_sdk::zconnector::ZConnector;
 use pyo3::prelude::*;
 use pyo3::PyObjectProtocol;
 use uuid::Uuid;
-use zenoh::*;
 
-use crate::{to_pyerr, zrpc_to_pyerr};
+use crate::to_pyerr;
+use crate::FosZenohSession;
 
 #[pyclass]
 #[derive(Clone)]
@@ -40,23 +39,14 @@ pub fn api(_py: Python, m: &PyModule) -> PyResult<()> {
 #[pymethods]
 impl FduApi {
     #[new]
-    fn new(locator: String) -> PyResult<Self> {
-        async fn _new(locator: String) -> FduApi {
-            let zenoh = Arc::new(
-                Zenoh::new(Properties::from(format!("mode=client;peer={}", locator)).into())
-                    .await
-                    .unwrap(),
-            );
-            let zsession = Arc::new(
-                zenoh::net::open(Properties::from(format!("mode=client;peer={}", locator)).into())
-                    .await
-                    .unwrap(),
-            );
-            let zconnector = Arc::new(ZConnector::new(zenoh.clone(), None, None));
-            let a = Arc::new(api::FDUApi::new(zconnector, zsession));
-            FduApi { a }
-        }
-        task::block_on(async { Ok(_new(locator).await) })
+    fn new(zenoh: FosZenohSession) -> PyResult<Self> {
+        task::block_on(async {
+            let a = Arc::new(api::FDUApi::new(
+                zenoh.zconnector.clone(),
+                zenoh.zsession.clone(),
+            ));
+            Ok(Self { a })
+        })
     }
 
     fn onboard_fdu(&self, fdu: crate::im::fdu::FduDescriptor) -> PyResult<String> {
