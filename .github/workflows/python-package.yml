@@ -40,7 +40,7 @@ jobs:
         pip install maturin
 
     - name: Build fog05-python
-      run: maturin build
+      run: maturin build --no-sdist
 
     - name: Clippy
       uses: actions-rs/cargo@v1

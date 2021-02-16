@@ -9,12 +9,12 @@ classifier = [
     "Programming Language :: Python :: 3",
     "Programming Language :: Rust",
     "Intended Audience :: Developers",
-    "Development Status :: 4 - Beta",
+    "Development Status :: 1 - Alpha",
     "License :: OSI Approved :: Apache Software License",
     "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
     "Operating System :: POSIX :: Linux",
 ]
-maintainer = "ADLINK zenoh team, <zenoh@adlink-labs.tech>"
+maintainer = "ADLINK fog05 team, <fog05@adlink-labs.tech>"
 
 [lib]
 name = "fog05"

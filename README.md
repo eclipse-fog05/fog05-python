@@ -55,9 +55,10 @@ Requirements:
 
 Steps:
  * Make sure your shell is running in a Python virtual environment.
- ```bash
-
- ```
+    ```bash
+    python3 -m venv ../venv
+    source ../venv/bin/activate
+    ```
  * Build fog05-python using **maturin**
    ```bash
    cd fog05-python
