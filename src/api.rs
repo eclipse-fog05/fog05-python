@@ -12,13 +12,13 @@
 *********************************************************************************/
 
 use async_std::sync::Arc;
+use async_std::task;
 use fog05_sdk::api;
 use fog05_sdk::zconnector::ZConnector;
 use pyo3::prelude::*;
 use pyo3::PyObjectProtocol;
 use uuid::Uuid;
 use zenoh::*;
-use async_std::task;
 
 use crate::{to_pyerr, zrpc_to_pyerr};
 
@@ -35,15 +35,12 @@ pub fn api(_py: Python, m: &PyModule) -> PyResult<()> {
     Ok(())
 }
 
-
 // Cannot use async until: https://github.com/PyO3/pyo3/pull/1406
 
 #[pymethods]
 impl FduApi {
-
     #[new]
     fn new(locator: String) -> PyResult<Self> {
-
         async fn _new(locator: String) -> FduApi {
             let zenoh = Arc::new(
                 Zenoh::new(Properties::from(format!("mode=client;peer={}", locator)).into())
@@ -59,17 +56,13 @@ impl FduApi {
             let a = Arc::new(api::FDUApi::new(zconnector, zsession));
             FduApi { a }
         }
-        task::block_on(async {
-            Ok(_new(locator).await)
-        })
-
+        task::block_on(async { Ok(_new(locator).await) })
     }
 
-    fn onboard_fdu(&self, fdu : crate::im::fdu::FduDescriptor ) -> PyResult<String> {
+    fn onboard_fdu(&self, fdu: crate::im::fdu::FduDescriptor) -> PyResult<String> {
         task::block_on(async {
-            let fdu_uuid = self.a.onboard_fdu(fdu.d).await
-            .map_err(to_pyerr)?;
-            Ok(format!("{}",fdu_uuid))
+            let fdu_uuid = self.a.onboard_fdu(fdu.d).await.map_err(to_pyerr)?;
+            Ok(format!("{}", fdu_uuid))
         })
     }
 
@@ -78,24 +71,82 @@ impl FduApi {
         fdu_uuid: String,
         node_uuid: Option<String>,
     ) -> PyResult<crate::im::fdu::FduRecord> {
-
-        let fdu_uuid = Uuid::parse_str(&fdu_uuid).map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
+        let fdu_uuid = Uuid::parse_str(&fdu_uuid)
+            .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
         let node_uuid = match node_uuid {
-            Some(id) => Some(Uuid::parse_str(&id).map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?),
-            None => None
+            Some(id) => Some(
+                Uuid::parse_str(&id)
+                    .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?,
+            ),
+            None => None,
         };
 
-        task::block_on( async {
-
-            let r =
-            self.a
-            .define_fdu(fdu_uuid, node_uuid)
-            .await
-            .map_err(to_pyerr)?;
-            Ok(crate::im::fdu::FduRecord{r})
+        task::block_on(async {
+            let r = self
+                .a
+                .define_fdu(fdu_uuid, node_uuid)
+                .await
+                .map_err(to_pyerr)?;
+            Ok(crate::im::fdu::FduRecord { r })
         })
+    }
 
+    fn configure_fdu(&self, instance_uuid: String) -> PyResult<crate::im::fdu::FduRecord> {
+        let instance_uuid = Uuid::parse_str(&instance_uuid)
+            .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
+        task::block_on(async {
+            let r = self
+                .a
+                .configure_fdu(instance_uuid)
+                .await
+                .map_err(to_pyerr)?;
+            Ok(crate::im::fdu::FduRecord { r })
+        })
+    }
 
+    fn start_fdu(&self, instance_uuid: String) -> PyResult<crate::im::fdu::FduRecord> {
+        let instance_uuid = Uuid::parse_str(&instance_uuid)
+            .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
+        task::block_on(async {
+            let r = self.a.start_fdu(instance_uuid).await.map_err(to_pyerr)?;
+            Ok(crate::im::fdu::FduRecord { r })
+        })
+    }
+
+    fn stop_fdu(&self, instance_uuid: String) -> PyResult<crate::im::fdu::FduRecord> {
+        let instance_uuid = Uuid::parse_str(&instance_uuid)
+            .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
+        task::block_on(async {
+            let r = self.a.stop_fdu(instance_uuid).await.map_err(to_pyerr)?;
+            Ok(crate::im::fdu::FduRecord { r })
+        })
+    }
+
+    fn clean_fdu(&self, instance_uuid: String) -> PyResult<crate::im::fdu::FduRecord> {
+        let instance_uuid = Uuid::parse_str(&instance_uuid)
+            .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
+        task::block_on(async {
+            let r = self.a.clean_fdu(instance_uuid).await.map_err(to_pyerr)?;
+            Ok(crate::im::fdu::FduRecord { r })
+        })
+    }
+
+    fn undefine_fdu(&self, instance_uuid: String) -> PyResult<crate::im::fdu::FduRecord> {
+        let instance_uuid = Uuid::parse_str(&instance_uuid)
+            .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
+        task::block_on(async {
+            let r = self.a.undefine_fdu(instance_uuid).await.map_err(to_pyerr)?;
+            Ok(crate::im::fdu::FduRecord { r })
+        })
+    }
+
+    fn offload_fdu(&self, fdu_uuid: String) -> PyResult<String> {
+        let fdu_uuid = Uuid::parse_str(&fdu_uuid)
+            .map_err(|err| PyErr::new::<crate::FError, _>(err.to_string()))?;
+        task::block_on(async {
+            let r = self.a.offload_fdu(fdu_uuid).await.map_err(to_pyerr)?;
+            Ok(format!("{}", r))
+        })
     }
 }
 
