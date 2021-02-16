@@ -20,6 +20,9 @@ pub use fdu::*;
 pub mod entity;
 pub use entity::*;
 
+pub mod net;
+pub use net::*;
+
 #[pymodule]
 fn im(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pymodule!(fdu))?;
@@ -37,6 +40,16 @@ sys.modules['fog05.im.fdu'] = fdu
         "\
 import sys
 sys.modules['fog05.im.entity'] = entity
+        ",
+        None,
+        Some(m.dict()),
+    )?;
+
+    m.add_wrapped(wrap_pymodule!(net))?;
+    py.run(
+        "\
+import sys
+sys.modules['fog05.im.net'] = net
         ",
         None,
         Some(m.dict()),
