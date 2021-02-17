@@ -23,6 +23,7 @@ crate-type = ["cdylib"]
 [dependencies]
 fog05-sdk = { git = "https://github.com/eclipse-fog05/fog05.git", branch = "master" }
 zrpc =  { git = "https://github.com/eclipse-fog05/fog05.git", branch = "master" }
+znrpc-macros = { git = "https://github.com/eclipse-fog05/fog05.git", branch = "master" }
 zenoh = { git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "master" }
 zenoh-protocol = { git = "https://github.com/eclipse-zenoh/zenoh.git", branch = "master" }
 async-std = "=1.9.0"

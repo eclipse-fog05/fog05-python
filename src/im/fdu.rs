@@ -99,6 +99,12 @@ impl PyObjectProtocol for FduDescriptor {
     }
 }
 
+impl pyo3::conversion::ToPyObject for FduDescriptor {
+    fn to_object(&self, py: Python) -> pyo3::PyObject {
+        pyo3::IntoPy::into_py(pyo3::Py::new(py, self.clone()).unwrap(), py)
+    }
+}
+
 #[pymethods]
 impl FduRecord {
     #[cfg(feature = "cbor")]
@@ -158,5 +164,11 @@ impl PyObjectProtocol for FduRecord {
 
     fn __format__(&self, _format_spec: &str) -> PyResult<String> {
         self.__str__()
+    }
+}
+
+impl pyo3::conversion::ToPyObject for FduRecord {
+    fn to_object(&self, py: Python) -> pyo3::PyObject {
+        pyo3::IntoPy::into_py(pyo3::Py::new(py, self.clone()).unwrap(), py)
     }
 }
