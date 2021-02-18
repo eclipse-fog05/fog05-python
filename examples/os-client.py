@@ -41,3 +41,6 @@ def main():
 
 if __name__=='__main__':
     main()
+
+
+    # {'uuid': None, 'id': 'test-ping-fdu', 'name': 'ping fdu', 'version': '0.3.0', 'fdu_version': '0.0.1', 'description': None, 'hypervisor': 'bare', 'image': None, 'hypervisor_specific': '{"cmd":"ping","args":["1.1.1.1"],"env":{}}', 'computation_requirements': {'cpu_arch': 'x86_64', 'cpu_min_freq': 0, 'cpu_min_count': 0, 'gpu_min_count': 0, 'fpga_min_count': 0, 'operating_system': None, 'ram_size_mb': 10, 'storage_size_mb': 1}, 'geographical_requirements': None, 'interfaces': [], 'storage': [], 'connection_points': [], 'configuration': None, 'migration_kind': 'COLD', 'replicas': None, 'depends_on': []}

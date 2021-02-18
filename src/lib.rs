@@ -28,6 +28,9 @@ pub use api::*;
 pub mod plugins;
 pub use plugins::*;
 
+pub mod zconnector;
+pub use zconnector::*;
+
 #[pymodule]
 fn fog05(py: Python, m: &PyModule) -> PyResult<()> {
     m.add_wrapped(wrap_pymodule!(im))?;
@@ -64,6 +67,19 @@ sys.modules['fog05.api'] = api
         "\
 import sys
 sys.modules['fog05.plugins'] = plugins
+        ",
+        None,
+        Some(m.dict()),
+    )?;
+
+    m.add_wrapped(wrap_pymodule!(zconnector))?;
+
+    // force addition of "zenoh.net" module
+    // (see https://github.com/PyO3/pyo3/issues/759#issuecomment-653964601)
+    py.run(
+        "\
+import sys
+sys.modules['fog05.zconnector'] = zconnector
         ",
         None,
         Some(m.dict()),
